@@ -102,17 +102,22 @@ describe('BasePatientListGen:', () => {
     gen.addMissingColumns(baseReport, templateReport);
 
     expect(baseReport).to.deep.equal(expectedBaseReport);
+
+    // handle other test cases in related functions
+    // willColumnTitlesCollide case similar column members
+    expect(gen.willColumnTitlesCollide({
+      column: 'same'
+    }, {
+      column: 'same'
+    })).to.be.true;
   });
 
-  it('should add sources as specified in the dynamic query generation directives' +
+  it('should create sources member as specified in the dynamic query generation directives' +
     ' in aggregate report schema, in addition to base schema sources', () => {
     let aggregateSchema = {
       'dynamicJsonQueryGenerationDirectives': {
         'patientListGenerator': {
-          'generated_query_name': 'patient_list',
           'generatingDirectives': {
-            'use_template': 'patient_list_template',
-            'use_template_version': '1.0',
             'joinDirectives': {
               'joinType': 'INNER',
               'joinCondition': '<<base_column>> = <<template_column>>',
@@ -191,7 +196,116 @@ describe('BasePatientListGen:', () => {
       ]
     };
 
-    gen.mergeSources(aggregateSchema, baseSchema, templateSchema);
+    gen.addSourcesToGeneratedSchema(aggregateSchema, baseSchema, templateSchema);
     expect(baseSchema).to.deep.equal(expectedDynamic);
+  });
+
+  it('should generate the dynamically generated json query filters', () => {
+    let aggregateSchema = {
+      'groupBy': {
+        'columns': [ 'gender', 'age_range']
+      }
+    };
+
+    let baseSchema = {
+      'columns': [
+        {
+          'type': 'simple_column',
+          'alias': 'gender',
+          'column': 'hmrd.gender'
+        },
+        {
+          'type': 'derived_column',
+          'alias': 'age_range',
+          'expressionType': 'case_statement',
+          'expressionOptions': {
+            'caseOptions': [
+              {
+                'condition': 'hmrd.age between 0 and 1',
+                'value': '0_to_1'
+              },
+              {
+                'condition': 'hmrd.age between 1 and 9',
+                'value': '1_to_9'
+              },
+              {
+                'condition': 'else',
+                'value': 'older_than_9'
+              }
+            ]
+          }
+        },
+        {
+          'type': 'derived_column',
+          'alias': 'on_ctx_prophylaxis',
+          'expressionType': 'simple_expression',
+          'expressionOptions': {
+            'expression': 'CASE WHEN status = "active" AND on_art_this_month = 1 THEN 1 ELSE NULL'
+          }
+        }
+      ],
+      'filters': {
+        'conditionJoinOperator': 'AND',
+        'conditions': [
+          {
+            'filterActingOn': 'simple_column',
+            'conditionExpression': 'endDate = <<@endDate>>'
+          }
+        ]
+      }
+    };
+
+    let passedParams = {
+      'gender': 'F',
+      'age_range': '1_to_9',
+      'on_ctx_prophylaxis': 1,
+      'endDate': '2018-01-01'
+    };
+
+    let expectedFilterMember = {
+      'conditionJoinOperator': 'AND',
+      'conditions': [
+        {
+          'filterActingOn': 'simple_column',
+          'conditionExpression': 'endDate = <<@endDate>>'
+        },
+        {
+          'filterActingOn': 'simple_column',
+          'conditionExpression': 'gender = "F"',
+          'dynamicallyGenerated': true
+        },
+        {
+          'filterActingOn': 'derived_column',
+          'conditionExpression': 'hmrd.age between 1 and 9',
+          'dynamicallyGenerated': true
+        },
+        {
+          'filterActingOn': 'derived_column',
+          'conditionExpression': '1 = (CASE WHEN status = "active" AND on_art_this_month = 1 THEN 1 ELSE NULL)',
+          'dynamicallyGenerated': true
+        }
+      ]
+    };
+
+    gen.addMissingFilters(aggregateSchema, baseSchema, passedParams);
+    expect(baseSchema.filters).to.deep.equal(expectedFilterMember);
+
+    // handle uncovered test cases on related functions
+    // getParamValue case number
+    expect(gen.getParamValue(1)).to.equal(1);
+
+    // getCaseExpressionColumnFilterObject case else
+    expect(gen.getCaseExpressionColumnFilterObject(baseSchema.columns[1], 'older_than_9'))
+      .to.deep.equal({
+        filterActingOn: 'derived_column',
+        conditionExpression: '!((hmrd.age between 0 and 1) AND(hmrd.age between 1 and 9))',
+        dynamicallyGenerated: true
+      });
+
+    // getFilterObject case unknown expression type
+    expect(gen.getFilterObject({
+      type: 'other',
+      expressionType: 'other'
+    })).to.be.null;
   });
 });
