@@ -1,18 +1,23 @@
-// import SqlGenerators from './sql-generators.js';
-// import * as Squel from 'squel';
+import { SqlGenerators } from 'ampath-json2sql';
 import * as _ from 'lodash';
 export default class BasePatientListGen {
   baseSchema = null;
   aggregateSchema = null;
   patientListTemplateSchema = null;
-  constructor(baseSchema, aggregateSchema, patientListTemplateSchema) {
+  params = null;
+  constructor(baseSchema, aggregateSchema, patientListTemplateSchema, params) {
     this.baseSchema = _.cloneDeep(baseSchema);
     this.aggregateSchema = _.cloneDeep(aggregateSchema);
     this.patientListTemplateSchema = _.cloneDeep(patientListTemplateSchema);
+    this.params = params;
   }
 
   generatePatientListSchema() {
     return {};
+  }
+
+  addMappedParamsToParamsObject(datasources, params) {
+    return SqlGenerators.mapParamsMultipleDataSources(datasources, params);
   }
 
   addMissingColumns(destinationSchema, sourceSchema) {
