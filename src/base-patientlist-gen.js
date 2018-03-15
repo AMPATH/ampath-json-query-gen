@@ -45,6 +45,15 @@ export default class BasePatientListGen {
     });
   }
 
+  addPagingParams(baseSchema) {
+    if (!baseSchema.paging) {
+      baseSchema.paging = {
+        offSetParam: 'offSetParam',
+        limitParam: 'limitParam'
+      };
+    }
+  }
+
   columnExistsInColumnArray(column, columnArray) {
     for (let i = 0; i < columnArray.length; i++) {
       if (this.willColumnTitlesCollide(column, columnArray[i])) {

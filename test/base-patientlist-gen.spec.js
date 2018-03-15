@@ -308,4 +308,38 @@ describe('BasePatientListGen:', () => {
       expressionType: 'other'
     })).to.be.null;
   });
+
+  it('should add paging params to the generated json schema', () => {
+    let baseSchema = {
+
+    };
+    let expectedPagedSchema = {
+      paging: {
+        offSetParam: 'offSetParam',
+        limitParam: 'limitParam'
+      }
+    };
+
+    gen.addPagingParams(baseSchema);
+
+    expect(baseSchema).to.deep.equal(expectedPagedSchema);
+
+    let baseWithPaging = {
+      paging: {
+        offSetParam: 'offset',
+        limitParam: 'limit'
+      }
+    };
+
+    let expectedWithPaging = {
+      paging: {
+        offSetParam: 'offset',
+        limitParam: 'limit'
+      }
+    };
+
+    gen.addPagingParams(baseWithPaging);
+    expect(baseWithPaging).to.deep.equal(expectedWithPaging);
+
+  });
 });
