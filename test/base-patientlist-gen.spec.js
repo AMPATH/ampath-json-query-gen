@@ -45,12 +45,7 @@ describe('BasePatientListGen:', () => {
   it('should add mapped params in data sources to the params object', () => {
     let datasources = [{
       table: 'etl.hiv_monthly_summary',
-      alias: 'hms',
-      forwarded_params: [
-        {
-          'mapping': 'endDate:eDate'
-        }
-      ]
+      alias: 'hms'
     },
     {
       dataSet: 'enrolledDataSet',
@@ -59,7 +54,7 @@ describe('BasePatientListGen:', () => {
         type: 'inner',
         joinCondition: 'p.patient_id = hms.patient_id and p.voided is null'
       },
-      forwarded_params: [
+      forwardedParams: [
         {
           'mapping': 'endDate:eDate'
         }
