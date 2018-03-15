@@ -1,6 +1,4 @@
 import chai from 'chai';
-// import mlog from 'mocha-logger';
-// import * as Squel from 'squel';
 chai.use(require('chai-string'));
 chai.expect();
 import {
@@ -19,6 +17,68 @@ describe('BasePatientListGen:', () => {
   it('should be defined', () => {
     expect(gen).to.exist;
     expect(gen.generatePatientListSchema()).not.be.null;
+  });
+
+  it('should clone all the schemas during init', () => {
+    let schemaA = {
+      a: 1
+    };
+    let schemaB = {
+      b: 'b'
+    };
+
+    let schemaC = {
+      c: true
+    };
+
+    let sample = new BasePatientListGen(schemaA, schemaB, schemaC);
+
+    expect(sample.baseSchema).to.not.equal(schemaA);
+    expect(sample.baseSchema).to.deep.equal(schemaA);
+    expect(sample.aggregateSchema).to.not.equal(schemaB);
+    expect(sample.aggregateSchema).to.deep.equal(schemaB);
+    expect(sample.patientListTemplateSchema).to.not.equal(schemaC);
+    expect(sample.patientListTemplateSchema).to.deep.equal(schemaC);
+
+  });
+
+  it('should add mapped params in data sources to the params object', () => {
+    let datasources = [{
+      table: 'etl.hiv_monthly_summary',
+      alias: 'hms',
+      forwarded_params: [
+        {
+          'mapping': 'endDate:eDate'
+        }
+      ]
+    },
+    {
+      dataSet: 'enrolledDataSet',
+      alias: 'p',
+      join: {
+        type: 'inner',
+        joinCondition: 'p.patient_id = hms.patient_id and p.voided is null'
+      },
+      forwarded_params: [
+        {
+          'mapping': 'endDate:eDate'
+        }
+      ]
+    }];
+
+    let params = {
+      endDate: '2017-10-10'
+    };
+
+    let expectedParams = {
+      endDate: '2017-10-10',
+      eDate: '2017-10-10'
+    };
+
+    let mapped = gen.addMappedParamsToParamsObject(datasources, params);
+
+    expect(mapped).to.deep.equal(expectedParams);
+
   });
 
   it('should add columns missing in the base report but exists' +
@@ -240,7 +300,7 @@ describe('BasePatientListGen:', () => {
   it('should generate the dynamically generated json query filters', () => {
     let aggregateSchema = {
       'groupBy': {
-        'columns': [ 'gender', 'age_range']
+        'columns': ['gender', 'age_range']
       }
     };
 
