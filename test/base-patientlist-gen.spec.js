@@ -21,6 +21,29 @@ describe('BasePatientListGen:', () => {
     expect(gen.generatePatientListSchema()).not.be.null;
   });
 
+  it('should clone all the schemas during init', ()=> {
+    let schemaA = {
+      a: 1
+    };
+    let schemaB = {
+      b: 'b'
+    };
+
+    let schemaC = {
+      c: true
+    };
+
+    let sample = new BasePatientListGen(schemaA, schemaB, schemaC);
+
+    expect(sample.baseSchema).to.not.equal(schemaA);
+    expect(sample.baseSchema).to.deep.equal(schemaA);
+    expect(sample.aggregateSchema).to.not.equal(schemaB);
+    expect(sample.aggregateSchema).to.deep.equal(schemaB);
+    expect(sample.patientListTemplateSchema).to.not.equal(schemaC);
+    expect(sample.patientListTemplateSchema).to.deep.equal(schemaC);
+
+  });
+
   it('should add columns missing in the base report but exists' +
     ' in the template report', () => {
 

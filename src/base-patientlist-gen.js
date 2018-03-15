@@ -1,13 +1,14 @@
 // import SqlGenerators from './sql-generators.js';
 // import * as Squel from 'squel';
+import * as _ from 'lodash';
 export default class BasePatientListGen {
   baseSchema = null;
   aggregateSchema = null;
   patientListTemplateSchema = null;
   constructor(baseSchema, aggregateSchema, patientListTemplateSchema) {
-    this.baseSchema = baseSchema;
-    this.aggregateSchema = aggregateSchema;
-    this.patientListTemplateSchema = patientListTemplateSchema;
+    this.baseSchema = _.cloneDeep(baseSchema);
+    this.aggregateSchema = _.cloneDeep(aggregateSchema);
+    this.patientListTemplateSchema = _.cloneDeep(patientListTemplateSchema);
   }
 
   generatePatientListSchema() {
