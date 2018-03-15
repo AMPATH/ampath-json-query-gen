@@ -200,6 +200,43 @@ describe('BasePatientListGen:', () => {
     expect(baseSchema).to.deep.equal(expectedDynamic);
   });
 
+  it('should add grouping functions present in the template', () => {
+
+    let templateSchema = {
+      'groupBy': {
+        'columns': ['t1.person_id']
+      }
+    };
+
+    let baseSchema = {
+
+    };
+
+    let baseSchema2 = {
+      'groupBy': {
+        'columns': ['t1.uuid']
+      }
+    };
+
+    let expectedBaseSchema = {
+      'groupBy': {
+        'columns': ['t1.person_id']
+      }
+    };
+
+    let expectedBaseSchema2 = {
+      'groupBy': {
+        'columns': ['t1.uuid', 't1.person_id']
+      }
+    };
+
+    gen.addGroupByParams(baseSchema, templateSchema);
+    gen.addGroupByParams(baseSchema2, templateSchema);
+    expect(baseSchema).to.deep.equal(expectedBaseSchema);
+    expect(baseSchema2).to.deep.equal(expectedBaseSchema2);
+
+  });
+
   it('should generate the dynamically generated json query filters', () => {
     let aggregateSchema = {
       'groupBy': {
@@ -342,4 +379,5 @@ describe('BasePatientListGen:', () => {
     expect(baseWithPaging).to.deep.equal(expectedWithPaging);
 
   });
+
 });

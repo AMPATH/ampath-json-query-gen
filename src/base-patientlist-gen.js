@@ -54,6 +54,14 @@ export default class BasePatientListGen {
     }
   }
 
+  addGroupByParams(baseSchema, templateSchema) {
+    if (!baseSchema.groupBy) {
+      baseSchema.groupBy = templateSchema.groupBy;
+    } else {
+      baseSchema.groupBy.columns = baseSchema.groupBy.columns.concat(templateSchema.groupBy.columns);
+    }
+  }
+
   columnExistsInColumnArray(column, columnArray) {
     for (let i = 0; i < columnArray.length; i++) {
       if (this.willColumnTitlesCollide(column, columnArray[i])) {
