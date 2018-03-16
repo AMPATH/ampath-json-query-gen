@@ -1,6 +1,6 @@
 {
   "name": "ampath-json-query-gen",
-  "version": "1.0.0-SNAPSHOT",
+  "version": "1.0.0-alpha3",
   "description": "Generate dynamic json representation of a mysql query, compatible with ampath-json2sql",
   "main": "lib/library.js",
   "scripts": {
