@@ -1,13 +1,18 @@
 import chai from 'chai';
+import * as sinon from 'sinon';
 chai.use(require('chai-string'));
+chai.use(require('sinon-chai'));
 chai.expect();
 import {
   BasePatientListGen
 }
   from '../src';
 
-const expect = chai.expect;
-const should = chai.should;
+// chai.config.includeStack = true;
+global.expect = chai.expect;
+global.should = chai.should;
+global.Assertion = chai.Assertion;
+global.assert = chai.assert;
 let gen;
 
 describe('BasePatientListGen:', () => {
@@ -16,7 +21,6 @@ describe('BasePatientListGen:', () => {
   });
   it('should be defined', () => {
     expect(gen).to.exist;
-    expect(gen.generatePatientListSchema()).not.be.null;
   });
 
   it('should clone all the schemas during init', () => {
@@ -39,6 +43,70 @@ describe('BasePatientListGen:', () => {
     expect(sample.aggregateSchema).to.deep.equal(schemaB);
     expect(sample.patientListTemplateSchema).to.not.equal(schemaC);
     expect(sample.patientListTemplateSchema).to.deep.equal(schemaC);
+
+  });
+
+  it('should generate the patient list report', ()=>{
+
+    let baseSchema = {
+      columns: [],
+      sources: []
+    };
+
+    let patientListTemplate = {
+      columns: [],
+      sources: []
+    };
+
+    let aggregateSchema = {
+      columns: [],
+      sources: []
+    };
+
+    let paramsObject = {
+    };
+
+    let expectedDynamicQuery = {
+      params: {a: 'a'},
+      generated: baseSchema
+    };
+
+    let plGen = new BasePatientListGen(baseSchema, aggregateSchema, patientListTemplate, paramsObject);
+
+    let addMappedParamsStub = sinon.stub(plGen, 'addMappedParamsToParamsObject').returns(expectedDynamicQuery.params);
+    let addMissingColumnsStub = sinon.stub(plGen, 'addMissingColumns').returns(undefined);
+    let addSourcesToGeneratedSchemaStub = sinon.stub(plGen, 'addSourcesToGeneratedSchema').returns(undefined);
+    let addMissingFiltersStub = sinon.stub(plGen, 'addMissingFilters').returns(undefined);
+    let addPagingParamsStub = sinon.stub(plGen, 'addPagingParams').returns(undefined);
+    let addGroupByParamsStub = sinon.stub(plGen, 'addGroupByParams').returns(undefined);
+
+    let generated = plGen.generatePatientListSchema();
+
+    // check params intergration
+    expect(addMappedParamsStub.calledWithExactly(plGen.aggregateSchema.sources, plGen.params)).to.be.true;
+
+    // add columns integration
+    expect(addMissingColumnsStub.args[0][0]).to.deep.equal(baseSchema);
+    expect(addMissingColumnsStub.args[0][1]).to.deep.equal(patientListTemplate);
+
+    // add data sources integration
+    expect(addSourcesToGeneratedSchemaStub.args[0][0]).to.deep.equal(aggregateSchema);
+    expect(addSourcesToGeneratedSchemaStub.args[0][1]).to.deep.equal(baseSchema);
+    expect(addSourcesToGeneratedSchemaStub.args[0][2]).to.deep.equal(patientListTemplate);
+
+    // add missing filters
+    expect(addMissingFiltersStub.args[0][0]).to.deep.equal(aggregateSchema);
+    expect(addMissingFiltersStub.args[0][1]).to.deep.equal(baseSchema);
+    expect(addMissingFiltersStub.args[0][2]).to.deep.equal(plGen.params);
+
+    // add paging parameters
+    expect(addPagingParamsStub.args[0][0]).to.deep.equal(baseSchema);
+
+    // add paging parameters
+    expect(addGroupByParamsStub.args[0][0]).to.deep.equal(baseSchema);
+    expect(addGroupByParamsStub.args[0][1]).to.deep.equal(patientListTemplate);
+
+    expect(generated).to.deep.equal(expectedDynamicQuery);
 
   });
 
