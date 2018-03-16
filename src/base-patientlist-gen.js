@@ -13,7 +13,29 @@ export default class BasePatientListGen {
   }
 
   generatePatientListSchema() {
-    return {};
+    let generatedValues = {};
+
+    // map params that will be in sql query generation
+    generatedValues.params = this.addMappedParamsToParamsObject(this.aggregateSchema.sources, this.params);
+
+    // add columns present in template schema to base schema
+    this.addMissingColumns(this.baseSchema, this.patientListTemplateSchema);
+
+    // add datasources
+    this.addSourcesToGeneratedSchema(this.aggregateSchema, this.baseSchema, this.patientListTemplateSchema);
+
+    // add filters
+    this.addMissingFilters(this.aggregateSchema, this.baseSchema, this.params);
+
+    // add paging
+    this.addPagingParams(this.baseSchema);
+
+    // add grouping
+    this.addGroupByParams(this.baseSchema, this.patientListTemplateSchema);
+
+    generatedValues.generated = this.baseSchema;
+
+    return generatedValues;
   }
 
   addMappedParamsToParamsObject(datasources, params) {
