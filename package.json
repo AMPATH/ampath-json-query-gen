@@ -50,7 +50,7 @@
     "nyc": "^11.4.1"
   },
   "dependencies": {
-    "ampath-json2sql": "git+https://github.com/AMPATH/ampath-json2sql.git#v1.0.0",
+    "ampath-json2sql": "git+https://github.com/AMPATH/ampath-json2sql.git#v1.0.3",
     "lodash": "^4.17.5"
   }
 }

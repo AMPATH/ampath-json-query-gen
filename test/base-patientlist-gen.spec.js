@@ -181,8 +181,8 @@ describe('BasePatientListGen:', () => {
         {
           'type': 'derived_column',
           'alias': 'person_name',
-          'expression_type': 'simple_expression',
-          'expression_options': {
+          'expressionType': 'simple_expression',
+          'expressionOptions': {
             'expression': " CONCAT(COALESCE(person_name.given_name, ''), ' ', COALESCE(person_name.middle_name, ''), ' ', COALESCE(person_name.family_name, ''))"
           }
         }
@@ -213,8 +213,8 @@ describe('BasePatientListGen:', () => {
         {
           'type': 'derived_column',
           'alias': 'person_name',
-          'expression_type': 'simple_expression',
-          'expression_options': {
+          'expressionType': 'simple_expression',
+          'expressionOptions': {
             'expression': " CONCAT(COALESCE(person_name.given_name, ''), ' ', COALESCE(person_name.middle_name, ''), ' '," +
                 " COALESCE(person_name.family_name, ''))"
           }
