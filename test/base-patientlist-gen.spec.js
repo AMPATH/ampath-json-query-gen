@@ -431,7 +431,7 @@ describe('BasePatientListGen:', () => {
         },
         {
           'filterType': 'tableColumns',
-          'conditionExpression': 'gender = "F"',
+          'conditionExpression': 'hmrd.gender = "F"',
           'parameterName': '',
           'dynamicallyGenerated': true
         },
