@@ -121,10 +121,10 @@ export default class BasePatientListGen {
     let templateColumn = templateTableSource.alias + '.' + joinDirective.templateColumn;
 
     templateTableSource.join.joinCondition =
-    templateTableSource.join.joinCondition.replace('<<base_column>>', baseColumn);
+      templateTableSource.join.joinCondition.replace('<<base_column>>', baseColumn);
 
     templateTableSource.join.joinCondition =
-    templateTableSource.join.joinCondition.replace('<<template_column>>', templateColumn);
+      templateTableSource.join.joinCondition.replace('<<template_column>>', templateColumn);
   }
 
   getFilterObject(columnObject, param) {
@@ -148,8 +148,9 @@ export default class BasePatientListGen {
     expression = expression + this.getParamValue(param);
 
     return {
-      filterActingOn: 'simple_column',
+      'filterType': 'tableColumns',
       conditionExpression: expression,
+      'parameterName': '',
       dynamicallyGenerated: true
     };
   }
@@ -162,8 +163,9 @@ export default class BasePatientListGen {
     expression = expression + ' = (' + columnObject.expressionOptions.expression + ')';
 
     return {
-      filterActingOn: 'derived_column',
+      'filterType': 'expressionColumns',
       conditionExpression: expression,
+      'parameterName': '',
       dynamicallyGenerated: true
     };
   }
@@ -196,8 +198,9 @@ export default class BasePatientListGen {
     }
 
     return {
-      filterActingOn: 'derived_column',
+      'filterType': 'expressionColumns',
       conditionExpression: expression,
+      'parameterName': '',
       dynamicallyGenerated: true
     };
   }
