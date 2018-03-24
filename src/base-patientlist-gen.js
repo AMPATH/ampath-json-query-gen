@@ -143,7 +143,7 @@ export default class BasePatientListGen {
   }
 
   getSimpleColumnFilterObject(columnObject, param) {
-    let expression = columnObject.alias + ' = ';
+    let expression = (columnObject.column || columnObject.alias) + ' = ';
 
     expression = expression + this.getParamValue(param);
 
