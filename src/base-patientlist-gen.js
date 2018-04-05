@@ -186,7 +186,7 @@ export default class BasePatientListGen {
         elseExpression = elseExpression + ' ' + joinOperator + '(' + option.condition + ')';
       }
       previousCondition = option.condition;
-      joinOperator = 'AND';
+      joinOperator = 'OR';
 
       if (option.value === param) {
         expression = option.condition;
@@ -195,6 +195,10 @@ export default class BasePatientListGen {
 
     if (expression === 'else') {
       expression = '!(' + elseExpression + ')';
+    }
+
+    if (expression === '') {
+      throw new Error('Uknown case option supplied:' + param);
     }
 
     return {
