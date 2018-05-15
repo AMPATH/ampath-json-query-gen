@@ -367,7 +367,74 @@ describe('BasePatientListGen:', () => {
       }
     };
 
+    let aggregateSchemaWithSkipParam = {
+      'groupBy': {
+        'columns': ['gender', 'age_range']
+      },
+      'dynamicJsonQueryGenerationDirectives': {
+        'patientListGenerator': {
+          'generatingDirectives': {
+            'joinDirectives': {
+              'joinType': 'INNER',
+              'joinCondition': '<<base_column>> = <<template_column>>',
+              'baseColumn': 'person_id',
+              'templateColumn': 'person_id'
+            },
+            'skipParams': ['gender']
+          }
+        }
+      }
+    };
+
     let baseSchema = {
+      'columns': [
+        {
+          'type': 'simple_column',
+          'alias': 'gender',
+          'column': 'hmrd.gender'
+        },
+        {
+          'type': 'derived_column',
+          'alias': 'age_range',
+          'expressionType': 'case_statement',
+          'expressionOptions': {
+            'caseOptions': [
+              {
+                'condition': 'hmrd.age between 0 and 1',
+                'value': '0_to_1'
+              },
+              {
+                'condition': 'hmrd.age between 1 and 9',
+                'value': '1_to_9'
+              },
+              {
+                'condition': 'else',
+                'value': 'older_than_9'
+              }
+            ]
+          }
+        },
+        {
+          'type': 'derived_column',
+          'alias': 'on_ctx_prophylaxis',
+          'expressionType': 'simple_expression',
+          'expressionOptions': {
+            'expression': 'CASE WHEN status = "active" AND on_art_this_month = 1 THEN 1 ELSE NULL'
+          }
+        }
+      ],
+      'filters': {
+        'conditionJoinOperator': 'AND',
+        'conditions': [
+          {
+            'filterType': 'tableColumns',
+            'conditionExpression': 'endDate = <<@endDate>>'
+          }
+        ]
+      }
+    };
+
+    let baseSchemaSkip = {
       'columns': [
         {
           'type': 'simple_column',
@@ -450,9 +517,39 @@ describe('BasePatientListGen:', () => {
       ]
     };
 
+    let expectedFilterMemberForSkipParam = {
+      'conditionJoinOperator': 'AND',
+      'conditions': [
+        {
+          'filterType': 'tableColumns',
+          'conditionExpression': 'endDate = <<@endDate>>'
+        },
+        {
+          'filterType': 'tableColumns',
+          'conditionExpression': 'hmrd.gender = "F"',
+          'parameterName': '',
+          'dynamicallyGenerated': true
+        },
+        {
+          'filterType': 'expressionColumns',
+          'conditionExpression': 'hmrd.age between 1 and 9',
+          'parameterName': '',
+          'dynamicallyGenerated': true
+        },
+        {
+          'filterType': 'expressionColumns',
+          'conditionExpression': '1 = (CASE WHEN status = "active" AND on_art_this_month = 1 THEN 1 ELSE NULL)',
+          'parameterName': '',
+          'dynamicallyGenerated': true
+        }
+      ]
+    };
+
     gen.addMissingFilters(aggregateSchema, baseSchema, passedParams);
     expect(baseSchema.filters).to.deep.equal(expectedFilterMember);
 
+    gen.addMissingFilters(aggregateSchemaWithSkipParam, baseSchemaSkip, passedParams);
+    expect(baseSchemaSkip.filters).to.deep.equal(expectedFilterMemberForSkipParam);
     // handle uncovered test cases on related functions
     // getParamValue case number
     expect(gen.getParamValue(1)).to.equal(1);

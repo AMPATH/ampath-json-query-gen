@@ -62,6 +62,13 @@ export default class BasePatientListGen {
   }
 
   addMissingFilters(aggregateSchema, baseSchema, suppliedParams) {
+    if (aggregateSchema.dynamicJsonQueryGenerationDirectives &&
+      aggregateSchema.dynamicJsonQueryGenerationDirectives.patientListGenerator &&
+       aggregateSchema.dynamicJsonQueryGenerationDirectives.patientListGenerator.skipParams) {
+      let skipParams = aggregateSchema.dynamicJsonQueryGenerationDirectives.patientListGenerator.skipParams;
+
+      skipParams.forEach(e => delete suppliedParams[e]);
+    }
     baseSchema.columns.forEach(column => {
       if (suppliedParams[column.alias] !== undefined) {
         let filter = this.getFilterObject(column, suppliedParams[column.alias]);
