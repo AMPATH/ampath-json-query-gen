@@ -379,9 +379,9 @@ describe('BasePatientListGen:', () => {
               'joinCondition': '<<base_column>> = <<template_column>>',
               'baseColumn': 'person_id',
               'templateColumn': 'person_id'
-            },
-            'skipParams': ['gender']
-          }
+            }
+          },
+          'skipParams': ['gender']
         }
       }
     };
@@ -523,12 +523,6 @@ describe('BasePatientListGen:', () => {
         {
           'filterType': 'tableColumns',
           'conditionExpression': 'endDate = <<@endDate>>'
-        },
-        {
-          'filterType': 'tableColumns',
-          'conditionExpression': 'hmrd.gender = "F"',
-          'parameterName': '',
-          'dynamicallyGenerated': true
         },
         {
           'filterType': 'expressionColumns',
