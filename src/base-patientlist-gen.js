@@ -66,8 +66,10 @@ export default class BasePatientListGen {
       aggregateSchema.dynamicJsonQueryGenerationDirectives.patientListGenerator &&
        aggregateSchema.dynamicJsonQueryGenerationDirectives.patientListGenerator.skipParams) {
       let skipParams = aggregateSchema.dynamicJsonQueryGenerationDirectives.patientListGenerator.skipParams;
+      let paramsCopy = Object.assign({}, suppliedParams);
 
-      skipParams.forEach(e => delete suppliedParams[e]);
+      skipParams.forEach(e => delete paramsCopy[e]);
+      suppliedParams = paramsCopy;
     }
     baseSchema.columns.forEach(column => {
       if (suppliedParams[column.alias] !== undefined) {
